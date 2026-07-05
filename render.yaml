@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# render.yaml — Render.com Infrastructure as Code
+# SensorModel v1.0 — Corverxis Technologies
+# Deploys: Next.js web service + PostgreSQL database
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  - type: web
+    name: sensormodel
+    env: node
+    region: oregon
+    plan: starter            # upgrade to standard for production
+    buildCommand: npm ci && npm run db:generate && npm run build
+    startCommand: npm run db:migrate && npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXTAUTH_URL
+        fromService:
+          type: web
+          name: sensormodel
+          property: host
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sensormodel-db
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        sync: false           # Set manually in Render dashboard
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: AZURE_AD_CLIENT_ID
+        sync: false
+      - key: AZURE_AD_CLIENT_SECRET
+        sync: false
+      - key: AZURE_AD_TENANT_ID
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+databases:
+  - name: sensormodel-db
+    databaseName: sensormodel
+    user: sensormodel
+    region: oregon
+    plan: starter            # upgrade to standard for production
+    postgresMajorVersion: 16
