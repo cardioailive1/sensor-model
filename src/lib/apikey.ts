@@ -5,8 +5,7 @@
  * Compliance: SOC 2 CC6.1, ISO 27001 A.9.4
  */
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs"); // eslint-disable-line
 import { nanoid } from "nanoid";
 import { prisma } from "./prisma";
 import { auditLog } from "./audit";
