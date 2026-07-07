@@ -10,7 +10,6 @@ services:
     env: node
     region: oregon
     plan: free
-    rootDir: sensormodel
     buildCommand: npm install && npm run db:generate && npm run build
     startCommand: npm run db:push && npm start
     healthCheckPath: /api/health
