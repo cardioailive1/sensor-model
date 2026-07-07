@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Activity, Bell, Settings, LogOut, ChevronRight, Zap, AlertTriangle } from "lucide-react";
 import { signOut } from "next-auth/react";
-import SensorChart from "@/components/SensorChart";
-import AlertBadge from "@/components/AlertBadge";
+import SensorChart from "./SensorChart";
+import AlertBadge from "./AlertBadge";
 
 interface Props {
   assets: any[];

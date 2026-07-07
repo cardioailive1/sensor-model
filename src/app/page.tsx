@@ -1,7 +1,7 @@
-import { auth } from "@/lib/auth";
+import { auth } from "../lib/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import DashboardClient from "@/components/DashboardClient";
+import { prisma } from "../lib/prisma";
+import DashboardClient from "../components/DashboardClient";
 
 export default async function HomePage() {
   const session = await auth();

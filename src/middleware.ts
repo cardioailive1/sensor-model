@@ -6,7 +6,7 @@
  * Compliance: SOC 2 CC6.6, OWASP A02, ISO 27001 A.13
  */
 
-import { auth } from "@/lib/auth";
+import { auth } from "./lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 

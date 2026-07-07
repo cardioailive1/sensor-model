@@ -6,8 +6,8 @@
  * Logs are retained for 7 years per data retention policy.
  */
 
-import { prisma } from "@/lib/prisma";
-import { logger } from "@/lib/logger";
+import { prisma } from "./prisma";
+import { logger } from "./logger";
 
 export interface AuditEntry {
   userId?: string | null;

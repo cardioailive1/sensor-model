@@ -7,11 +7,11 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { DataDeletionRequestSchema } from "@/lib/schemas";
-import { prisma } from "@/lib/prisma";
-import { auditLog, extractRequestMeta } from "@/lib/audit";
-import { logger } from "@/lib/logger";
+import { auth } from "../../../../../lib/auth";
+import { DataDeletionRequestSchema } from "../../../../../lib/schemas";
+import { prisma } from "../../../../../lib/prisma";
+import { auditLog, extractRequestMeta } from "../../../../../lib/audit";
+import { logger } from "../../../../../lib/logger";
 
 // POST — Right to Erasure
 export async function POST(req: NextRequest) {

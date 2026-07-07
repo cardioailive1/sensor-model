@@ -6,14 +6,14 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { validateApiKey } from "@/lib/apikey";
-import { PredictRequestSchema } from "@/lib/schemas";
-import { runAlgorithm } from "@/lib/ml/algorithms";
-import { prisma } from "@/lib/prisma";
-import { auditLog, extractRequestMeta } from "@/lib/audit";
-import { predictLimiter, rateLimitResponse } from "@/lib/ratelimit";
-import { logger } from "@/lib/logger";
+import { auth } from "../../../../lib/auth";
+import { validateApiKey } from "../../../../lib/apikey";
+import { PredictRequestSchema } from "../../../../lib/schemas";
+import { runAlgorithm } from "../../../../lib/ml/algorithms";
+import { prisma } from "../../../../lib/prisma";
+import { auditLog, extractRequestMeta } from "../../../../lib/audit";
+import { predictLimiter, rateLimitResponse } from "../../../../lib/ratelimit";
+import { logger } from "../../../../lib/logger";
 import { z } from "zod";
 
 export async function POST(req: NextRequest) {

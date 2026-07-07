@@ -4,11 +4,11 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { CreateApiKeySchema } from "@/lib/schemas";
-import { generateApiKey } from "@/lib/apikey";
-import { prisma } from "@/lib/prisma";
-import { apiLimiter, rateLimitResponse } from "@/lib/ratelimit";
+import { auth } from "../../../../lib/auth";
+import { CreateApiKeySchema } from "../../../../lib/schemas";
+import { generateApiKey } from "../../../../lib/apikey";
+import { prisma } from "../../../../lib/prisma";
+import { apiLimiter, rateLimitResponse } from "../../../../lib/ratelimit";
 import { z } from "zod";
 
 export async function GET(req: NextRequest) {

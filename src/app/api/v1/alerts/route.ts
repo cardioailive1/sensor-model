@@ -4,11 +4,11 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { PaginationSchema } from "@/lib/schemas";
-import { auditLog, extractRequestMeta } from "@/lib/audit";
-import { apiLimiter, rateLimitResponse } from "@/lib/ratelimit";
+import { auth } from "../../../../lib/auth";
+import { prisma } from "../../../../lib/prisma";
+import { PaginationSchema } from "../../../../lib/schemas";
+import { auditLog, extractRequestMeta } from "../../../../lib/audit";
+import { apiLimiter, rateLimitResponse } from "../../../../lib/ratelimit";
 
 export async function GET(req: NextRequest) {
   const rl = apiLimiter(req);

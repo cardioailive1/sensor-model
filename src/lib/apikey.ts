@@ -6,9 +6,9 @@
  * Compliance: SOC 2 CC6.1, ISO 27001 A.9.4
  */
 
-import { prisma } from "@/lib/prisma";
-import { logger } from "@/lib/logger";
-import { auditLog } from "@/lib/audit";
+import { prisma } from "./prisma";
+import { logger } from "./logger";
+import { auditLog } from "./audit";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 
