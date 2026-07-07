@@ -14,8 +14,7 @@ const credentialsSchema = z.object({
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
-
+  session: { strategy: "jwt", maxAge: 28800 },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -24,18 +23,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         params: { prompt: "consent", access_type: "offline", scope: "openid email profile" },
       },
     }),
-
     GitHub({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
-
     MicrosoftEntraID({
       clientId: process.env.AZURE_AD_CLIENT_ID!,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
-      issuer: `https://login.microsoftonline.com/${process.env.AZURE_AD_TENANT_ID ?? "common"}/v2.0`,
+      issuer: "https://login.microsoftonline.com/common/v2.0",
     }),
-
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
@@ -53,7 +49,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -63,8 +58,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return token;
     },
-
     async session({ session, token }) {
       if (token && session.user) {
         (session.user as any).id = token.id as string;
-        (session.user as
+        (session.user as any).role = token.role;
+        (session.user as any).orgId = token.orgId;
+      }
+      return session;
+    },
+    async signIn({ user }) {
+      if (!user.email) return false;
+      const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+      if (dbUser?.deletedAt) return false;
+      return true;
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      prisma.user
+        .update({ where: { id: user.id! }, data: { lastLoginAt: new Date(), failedLoginCount: 0 } })
+        .catch(() => {});
+    },
+    async signOut() {},
+    async createUser({ user }) {
+      prisma.auditLog
+        .create({ data: { userId: user.id, action: "user.created", outcome: "success", metadata: {} } })
+        .catch(() => {});
+    },
+  },
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/error",
+    verifyRequest: "/auth/verify",
+  },
+});
