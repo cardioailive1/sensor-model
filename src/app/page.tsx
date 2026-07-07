@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { auth } from "../lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "../lib/prisma";
@@ -7,8 +9,7 @@ export default async function HomePage() {
   const session = await auth();
   if (!session?.user) redirect("/auth/signin");
 
-  const userId = (session.user as any).id;
-  const orgId  = (session.user as any).orgId;
+  const orgId = (session.user as any).orgId;
 
   const [assets, alertCount] = await Promise.all([
     prisma.asset.findMany({
