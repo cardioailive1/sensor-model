@@ -12,7 +12,6 @@ import GitHub from "next-auth/providers/github";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
-import { auditLog } from "./audit";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
