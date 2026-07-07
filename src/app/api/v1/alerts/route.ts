@@ -1,13 +1,7 @@
-/**
- * GET  /api/v1/alerts        — list active alerts for org
- * PATCH /api/v1/alerts/[id]  — resolve alert
- */
-
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
 import { PaginationSchema } from "../../../../lib/schemas";
-import { auditLog, extractRequestMeta } from "../../../../lib/audit";
 import { apiLimiter, rateLimitResponse } from "../../../../lib/ratelimit";
 
 export async function GET(req: NextRequest) {
@@ -33,9 +27,7 @@ export async function GET(req: NextRequest) {
   const [alerts, total] = await Promise.all([
     prisma.alert.findMany({
       where,
-      include: {
-        sensor: { select: { id: true, name: true, type: true, unit: true } },
-      },
+      include: { sensor: { select: { id: true, name: true, type: true, unit: true } } },
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { createdAt: "desc" },
