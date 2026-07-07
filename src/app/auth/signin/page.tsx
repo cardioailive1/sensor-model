@@ -1,12 +1,14 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { Chrome, Github, Building2 } from "lucide-react";
 
 const providers = [
-  { id: "google",     label: "Continue with Google",    Icon: Chrome,    color: "bg-white text-gray-800 hover:bg-gray-100" },
-  { id: "github",     label: "Continue with GitHub",    Icon: Github,    color: "bg-gray-900 text-white hover:bg-gray-800 border border-gray-700" },
+  { id: "google", label: "Continue with Google", Icon: Chrome, color: "bg-white text-gray-800 hover:bg-gray-100" },
+  { id: "github", label: "Continue with GitHub", Icon: Github, color: "bg-gray-900 text-white hover:bg-gray-800 border border-gray-700" },
   { id: "microsoft-entra-id", label: "Continue with Microsoft", Icon: Building2, color: "bg-blue-600 text-white hover:bg-blue-700" },
 ];
 
@@ -23,28 +25,24 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen bg-navy flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#0a1628] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-ocean/20 flex items-center justify-center">
-              <span className="text-ocean font-bold text-lg">S</span>
+            <div className="w-10 h-10 rounded-xl bg-[#00c2e0]/20 flex items-center justify-center">
+              <span className="text-[#00c2e0] font-bold text-lg">S</span>
             </div>
             <div>
               <div className="text-white font-bold text-xl">SensorModel</div>
-              <div className="text-ocean text-xs tracking-widest uppercase">Corverxis Technologies</div>
+              <div className="text-[#00c2e0] text-xs tracking-widest uppercase">Corverxis Technologies</div>
             </div>
           </div>
           <p className="text-gray-400 text-sm">Real-Time Sensor Prediction Platform</p>
         </div>
 
-        {/* Sign-in card */}
-        <div className="glass-card p-8">
+        <div className="bg-white/5 border border-white/10 rounded-lg p-8">
           <h1 className="text-xl font-semibold text-white mb-2">Sign in to SensorModel</h1>
-          <p className="text-gray-400 text-sm mb-6">
-            Use your organisation's identity provider for secure access.
-          </p>
+          <p className="text-gray-400 text-sm mb-6">Use your organisation identity provider for secure access.</p>
 
           <div className="space-y-3">
             {providers.map(({ id, label, Icon, color }) => (
@@ -64,11 +62,7 @@ export default function SignInPage() {
 
           <div className="mt-6 pt-6 border-t border-white/10">
             <p className="text-xs text-gray-500 text-center">
-              By signing in you agree to our{" "}
-              <a href="/legal/privacy" className="text-ocean hover:underline">Privacy Policy</a>
-              {" "}and{" "}
-              <a href="/legal/terms" className="text-ocean hover:underline">Terms of Service</a>.
-              <br />Access is governed by your organisation's data processing agreement.
+              By signing in you agree to our Privacy Policy and Terms of Service.
             </p>
           </div>
         </div>
