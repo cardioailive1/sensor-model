@@ -1,16 +1,15 @@
 /**
  * API Key Authentication
- *
  * Format: sm_live_<random32> (production) | sm_test_<random32> (test)
  * Storage: only bcrypt hash is stored — plaintext never persisted
  * Compliance: SOC 2 CC6.1, ISO 27001 A.9.4
  */
 
-import { prisma } from "./prisma";
-import { logger } from "./logger";
-import { auditLog } from "./audit";
-import bcrypt from "bcryptjs";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const bcrypt = require("bcryptjs");
 import { nanoid } from "nanoid";
+import { prisma } from "./prisma";
+import { auditLog } from "./audit";
 
 const KEY_PREFIX = "sm_live_";
 const TEST_PREFIX = "sm_test_";
@@ -18,8 +17,8 @@ const BCRYPT_ROUNDS = 12;
 
 export interface GeneratedApiKey {
   id: string;
-  key: string;     // full key — shown ONCE to user
-  prefix: string;  // first 12 chars for identification
+  key: string;
+  prefix: string;
 }
 
 export async function generateApiKey(
@@ -50,7 +49,6 @@ export async function validateApiKey(
 
   const prefix = raw.slice(0, 12);
 
-  // Find candidates by prefix (fast index lookup)
   const candidates = await prisma.apiKey.findMany({
     where: {
       prefix,
@@ -65,8 +63,6 @@ export async function validateApiKey(
       if (requiredScope && !candidate.scopes.includes(requiredScope)) {
         return { valid: false };
       }
-
-      // Update last used (non-blocking)
       prisma.apiKey
         .update({ where: { id: candidate.id }, data: { lastUsedAt: new Date() } })
         .catch(() => {});
