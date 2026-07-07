@@ -5,22 +5,15 @@
 @layer base {
   :root {
     --radius: 0.5rem;
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 14%;
-    --card-foreground: 210 40% 98%;
-    --primary: 188 100% 44%;
-    --primary-foreground: 222 47% 11%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
     --border: 217 33% 20%;
-    --ring: 188 100% 44%;
   }
 
-  * { @apply border-border; }
+  * {
+    border-color: hsl(var(--border));
+  }
+
   body {
-    @apply bg-navy text-white;
+    @apply bg-[#0a1628] text-white;
     font-family: "Inter", system-ui, -apple-system, sans-serif;
   }
 }
@@ -30,7 +23,7 @@
     @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg;
   }
   .btn-primary {
-    @apply bg-ocean hover:bg-ocean-400 text-navy font-semibold px-4 py-2 rounded-lg
+    @apply bg-[#00c2e0] hover:bg-[#00aecb] text-[#0a1628] font-semibold px-4 py-2 rounded-lg
            transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .sensor-badge {
