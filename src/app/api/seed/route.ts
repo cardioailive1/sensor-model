@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../lib/prisma";
+import { prisma } from "../../../lib/prisma";
 
 export async function GET() {
   try {
-    // Demo org
     const org = await prisma.org.upsert({
       where: { slug: "corverxis-demo" },
       update: {},
@@ -15,7 +14,6 @@ export async function GET() {
       },
     });
 
-    // Demo asset
     const asset = await prisma.asset.upsert({
       where: { id: "demo-asset-001" },
       update: {},
@@ -30,7 +28,6 @@ export async function GET() {
       },
     });
 
-    // Demo sensors
     const sensors = [
       { id: "demo-sensor-spindle", name: "Spindle Vibration", type: "spindle_vib", unit: "mm/s", thresholds: { warning: 4.5, critical: 7.1, low: 0 } },
       { id: "demo-sensor-bearing", name: "Bearing Temperature", type: "bearing_temp", unit: "°C", thresholds: { warning: 75, critical: 90, low: -10 } },
@@ -54,7 +51,6 @@ export async function GET() {
       });
     }
 
-    // Link logged-in users to demo org
     await prisma.user.updateMany({
       where: { orgId: null },
       data: { orgId: org.id },
