@@ -1,15 +1,7 @@
-/**
- * Next.js Middleware
- * Protects all routes except public paths
- * Uses Node.js runtime (not Edge) to avoid Auth.js/jose compatibility issues
- */
-
 import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = [
-  "/auth/signin",
-  "/auth/error",
-  "/auth/verify",
+  "/auth",
   "/api/auth",
   "/api/health",
   "/_next",
@@ -22,21 +14,23 @@ export function middleware(req: NextRequest) {
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
   if (isPublic) return NextResponse.next();
 
-  // Check for session cookie
-  const sessionToken =
-    req.cookies.get("next-auth.session-token")?.value ||
-    req.cookies.get("__Secure-next-auth.session-token")?.value;
+  // Check for any auth cookie (Auth.js v5 uses different cookie names)
+  const cookies = req.cookies.getAll();
+  const hasSession = cookies.some(
+    (c) =>
+      c.name.includes("authjs.session-token") ||
+      c.name.includes("next-auth.session-token") ||
+      c.name.includes("__Secure-authjs.session-token") ||
+      c.name.includes("__Secure-next-auth.session-token")
+  );
 
-  if (!sessionToken) {
+  if (!hasSession) {
     const signInUrl = new URL("/auth/signin", req.url);
     signInUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(signInUrl);
   }
 
-  const requestId = crypto.randomUUID();
-  const response = NextResponse.next();
-  response.headers.set("X-Request-Id", requestId);
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
