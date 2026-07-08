@@ -2109,6 +2109,17 @@ renderPMAlerts();
   }, 10000); // sync every 10 seconds
 
   loadBackendSensors();
+
+  // Show admin button if user is SUPER_ADMIN or ADMIN
+  if (window.SM_USER && (window.SM_USER.role === 'SUPER_ADMIN' || window.SM_USER.role === 'ADMIN')) {
+    const adminBtn = document.createElement('a');
+    adminBtn.href = '/admin/users';
+    adminBtn.innerHTML = '👥 Manage Users';
+    adminBtn.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#00c2e0;color:#0a1628;padding:10px 18px;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;z-index:9999;box-shadow:0 4px 12px rgba(0,194,224,0.3);';
+    adminBtn.onmouseover = function() { this.style.background = '#00aecb'; };
+    adminBtn.onmouseout  = function() { this.style.background = '#00c2e0'; };
+    document.body.appendChild(adminBtn);
+  }
 })();
 </script>
 </body>
