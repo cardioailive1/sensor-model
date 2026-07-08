@@ -1,27 +1,25 @@
 "use client";
-
 export const dynamic = "force-dynamic";
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Chrome, Github, Building2 } from "lucide-react";
 
 const providers = [
-  { id: "google", label: "Continue with Google", Icon: Chrome, color: "bg-white text-gray-800 hover:bg-gray-100" },
-  { id: "github", label: "Continue with GitHub", Icon: Github, color: "bg-gray-900 text-white hover:bg-gray-800 border border-gray-700" },
+  { id: "google",              label: "Continue with Google",    Icon: Chrome,    color: "bg-white text-gray-800 hover:bg-gray-100" },
+  { id: "github",              label: "Continue with GitHub",    Icon: Github,    color: "bg-gray-900 text-white hover:bg-gray-800 border border-gray-700" },
   { id: "microsoft-entra-id", label: "Continue with Microsoft", Icon: Building2, color: "bg-blue-600 text-white hover:bg-blue-700" },
 ];
 
 export default function SignInPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleSignIn = async (providerId: string) => {
     setLoading(providerId);
-    try {
-      await signIn(providerId, { callbackUrl: "/" });
-    } finally {
-      setLoading(null);
-    }
+    try { await signIn(providerId, { callbackUrl: "/" }); }
+    finally { setLoading(null); }
   };
 
   return (
@@ -46,23 +44,21 @@ export default function SignInPage() {
 
           <div className="space-y-3">
             {providers.map(({ id, label, Icon, color }) => (
-              <button
-                key={id}
-                onClick={() => handleSignIn(id)}
-                disabled={loading !== null}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-all ${color} disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
+              <button key={id} onClick={() => handleSignIn(id)} disabled={loading !== null}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-all ${color} disabled:opacity-50 disabled:cursor-not-allowed`}>
                 <Icon className="w-4 h-4 flex-shrink-0" />
-                <span className="flex-1 text-center">
-                  {loading === id ? "Redirecting..." : label}
-                </span>
+                <span className="flex-1 text-center">{loading === id ? "Redirecting..." : label}</span>
               </button>
             ))}
           </div>
 
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <p className="text-xs text-gray-500 text-center">
-              By signing in you agree to our Privacy Policy and Terms of Service.
+          <div className="mt-6 pt-6 border-t border-white/10 text-center">
+            <p className="text-gray-500 text-sm">
+              Don&apos;t have an account?{" "}
+              <button onClick={() => router.push("/auth/register")}
+                className="text-[#00c2e0] hover:underline font-medium">
+                Register here
+              </button>
             </p>
           </div>
         </div>

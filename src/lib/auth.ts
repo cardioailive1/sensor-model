@@ -5,11 +5,6 @@ import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import { prisma } from "./prisma";
 import { z } from "zod";
 
-const credentialsSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt", maxAge: 28800 },
   trustHost: true,
@@ -22,12 +17,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         params: { prompt: "consent", access_type: "offline", scope: "openid email profile" },
       },
     }),
-
     GitHub({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
-
     MicrosoftEntraID({
       clientId: process.env.AZURE_AD_CLIENT_ID!,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
@@ -36,44 +29,60 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
 
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
+        // Look up full user record from DB
+        const dbUser = await prisma.user.findUnique({ where: { email: user.email! } });
+        if (dbUser) {
+          token.id      = dbUser.id;
+          token.role    = dbUser.role;
+          token.orgId   = dbUser.orgId;
+          token.approved = dbUser.approved;
+        }
         token.email = user.email;
-        token.name = user.name;
-        token.picture = user.image;
+        token.name  = user.name;
       }
       return token;
     },
 
     async session({ session, token }) {
       if (token && session.user) {
-        (session.user as any).id = token.id as string;
+        (session.user as any).id       = token.id;
+        (session.user as any).role     = token.role;
+        (session.user as any).orgId    = token.orgId;
+        (session.user as any).approved = token.approved;
       }
       return session;
     },
 
-    async signIn({ user, account }) {
+    async signIn({ user }) {
       if (!user.email) return false;
-      // Upsert user into database
-      try {
-        await prisma.user.upsert({
-          where: { email: user.email },
-          update: { name: user.name, image: user.image, lastLoginAt: new Date() },
-          create: {
-            email: user.email,
-            name: user.name,
-            image: user.image,
-            emailVerified: new Date(),
-          },
-        });
-      } catch {}
+
+      // Look up user in DB
+      const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+
+      if (!dbUser) {
+        // User not registered — send to register page
+        return "/auth/register";
+      }
+
+      if (dbUser.deletedAt) return false;
+
+      // Update last login and sync name/image
+      await prisma.user.update({
+        where: { id: dbUser.id },
+        data: { lastLoginAt: new Date(), name: user.name ?? dbUser.name, image: user.image ?? dbUser.image },
+      }).catch(() => {});
+
+      // If not approved, redirect to pending page
+      if (!dbUser.approved) return "/auth/pending";
+
       return true;
     },
   },
 
   pages: {
     signIn: "/auth/signin",
-    error: "/auth/error",
+    error:  "/auth/error",
   },
 });
