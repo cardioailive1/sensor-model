@@ -1,7 +1,3 @@
-// SensorModel - Prisma Schema
-// Corverxis Technologies
-// SOC 2 Type II compliant data model with full audit trail
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,17 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─── Auth ──────────────────────────────────────────────────────────────────
-
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
   emailVerified DateTime?
   name          String?
   image         String?
-  role          UserRole  @default(VIEWER)
+  role          UserRole  @default(PENDING)
   orgId         String?
   org           Org?      @relation(fields: [orgId], references: [id])
+
+  // Approval
+  approved        Boolean   @default(false)
+  approvedAt      DateTime?
+  approvedBy      String?
+  rejectedAt      DateTime?
+  rejectedReason  String?
+  registeredAt    DateTime  @default(now())
 
   // Auth
   accounts   Account[]
@@ -33,22 +35,23 @@ model User {
   auditLogs      AuditLog[]
   alerts         Alert[]
 
-  // Compliance
-  consentGivenAt  DateTime?
-  dataRegion      String    @default("us-east-1")
-  mfaEnabled      Boolean   @default(false)
-  mfaSecret       String?
-  lastLoginAt     DateTime?
-  lastLoginIp     String?
-  failedLoginCount Int      @default(0)
-  lockedUntil     DateTime?
+  // Security
+  consentGivenAt   DateTime?
+  dataRegion       String    @default("us-east-1")
+  mfaEnabled       Boolean   @default(false)
+  mfaSecret        String?
+  lastLoginAt      DateTime?
+  lastLoginIp      String?
+  failedLoginCount Int       @default(0)
+  lockedUntil      DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime? // soft delete for GDPR right-to-erasure
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([email])
   @@index([orgId])
+  @@index([approved])
   @@map("users")
 }
 
@@ -57,6 +60,7 @@ enum UserRole {
   ADMIN
   ENGINEER
   VIEWER
+  PENDING
 }
 
 model Account {
@@ -72,8 +76,7 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -100,23 +103,17 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// ─── Organisation ──────────────────────────────────────────────────────────
-
 model Org {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  plan        OrgPlan  @default(STARTER)
-  dataRegion  String   @default("us-east-1")
-  ssoEnabled  Boolean  @default(false)
-  ssoProvider String?
-  ssoConfig   Json?
+  id         String  @id @default(cuid())
+  name       String
+  slug       String  @unique
+  plan       OrgPlan @default(STARTER)
+  dataRegion String  @default("us-east-1")
 
-  users        User[]
-  assets       Asset[]
-  apiKeys      ApiKey[]
-  auditLogs    AuditLog[]
-  complianceDocs ComplianceDoc[]
+  users      User[]
+  assets     Asset[]
+  apiKeys    ApiKey[]
+  auditLogs  AuditLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -130,38 +127,34 @@ enum OrgPlan {
   ENTERPRISE
 }
 
-// ─── API Keys ──────────────────────────────────────────────────────────────
-
 model ApiKey {
-  id          String    @id @default(cuid())
-  name        String
-  keyHash     String    @unique // bcrypt hash — never store plaintext
-  prefix      String    // first 8 chars for identification: "sm_live_"
-  userId      String
-  orgId       String?
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  org         Org?      @relation(fields: [orgId], references: [id])
-  scopes      String[]  @default(["predict:read"])
-  lastUsedAt  DateTime?
-  expiresAt   DateTime?
-  revokedAt   DateTime?
-  createdAt   DateTime  @default(now())
+  id         String    @id @default(cuid())
+  name       String
+  keyHash    String    @unique
+  prefix     String
+  userId     String
+  orgId      String?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org        Org?      @relation(fields: [orgId], references: [id])
+  scopes     String[]  @default(["predict:read"])
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
 
   @@index([keyHash])
   @@map("api_keys")
 }
 
-// ─── Assets & Sensors ──────────────────────────────────────────────────────
-
 model Asset {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
   orgId       String
-  org         Org         @relation(fields: [orgId], references: [id])
-  vertical    String      // manufacturing, aerospace, ev_battery, etc.
+  org         Org      @relation(fields: [orgId], references: [id])
+  vertical    String
   location    String?
-  tags        String[]    @default([])
+  tags        String[] @default([])
 
   sensors  Sensor[]
   sessions SensorSession[]
@@ -174,19 +167,19 @@ model Asset {
 }
 
 model Sensor {
-  id          String     @id @default(cuid())
+  id          String @id @default(cuid())
   name        String
-  type        String     // bearing_temp, spindle_vib, cell_voltage, etc.
-  unit        String     // degC, mm/s, V, A, bar, Hz
+  type        String
+  unit        String
   assetId     String
-  asset       Asset      @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  config      Json       @default("{}")
-  thresholds  Json       @default("{}") // {warning: 75, critical: 90, low: 10}
-  mlAlgorithm String     @default("ensemble")
+  asset       Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  config      Json   @default("{}")
+  thresholds  Json   @default("{}")
+  mlAlgorithm String @default("ensemble")
 
-  readings     SensorReading[]
-  predictions  Prediction[]
-  alerts       Alert[]
+  readings    SensorReading[]
+  predictions Prediction[]
+  alerts      Alert[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -195,14 +188,12 @@ model Sensor {
   @@map("sensors")
 }
 
-// ─── Time-Series Data ──────────────────────────────────────────────────────
-
 model SensorReading {
   id        String   @id @default(cuid())
   sensorId  String
   sensor    Sensor   @relation(fields: [sensorId], references: [id], onDelete: Cascade)
   value     Float
-  quality   Float    @default(1.0) // 0-1 data quality score
+  quality   Float    @default(1.0)
   timestamp DateTime @default(now())
 
   @@index([sensorId, timestamp])
@@ -210,53 +201,51 @@ model SensorReading {
 }
 
 model Prediction {
-  id          String   @id @default(cuid())
-  sensorId    String
-  sensor      Sensor   @relation(fields: [sensorId], references: [id], onDelete: Cascade)
-  algorithm   String   // ekf, lstm, arima, fourier, ensemble
-  predicted   Float
-  confidence  Float    // 0-1
-  rulHours    Float?   // remaining useful life in hours
-  features    Json     @default("{}") // extracted signal features
-  timestamp   DateTime @default(now())
+  id         String   @id @default(cuid())
+  sensorId   String
+  sensor     Sensor   @relation(fields: [sensorId], references: [id], onDelete: Cascade)
+  algorithm  String
+  predicted  Float
+  confidence Float
+  rulHours   Float?
+  features   Json     @default("{}")
+  timestamp  DateTime @default(now())
 
   @@index([sensorId, timestamp])
   @@map("predictions")
 }
 
 model SensorSession {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  assetId    String
-  asset      Asset    @relation(fields: [assetId], references: [id])
-  startedAt  DateTime @default(now())
-  endedAt    DateTime?
-  config     Json     @default("{}")
-  ipAddress  String?
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  assetId   String
+  asset     Asset     @relation(fields: [assetId], references: [id])
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  config    Json      @default("{}")
+  ipAddress String?
 
   @@index([userId])
   @@index([assetId])
   @@map("sensor_sessions")
 }
 
-// ─── Alerts ────────────────────────────────────────────────────────────────
-
 model Alert {
-  id         String      @id @default(cuid())
+  id         String     @id @default(cuid())
   sensorId   String
-  sensor     Sensor      @relation(fields: [sensorId], references: [id])
+  sensor     Sensor     @relation(fields: [sensorId], references: [id])
   userId     String?
-  user       User?       @relation(fields: [userId], references: [id])
+  user       User?      @relation(fields: [userId], references: [id])
   severity   AlertLevel
-  type       String      // threshold_breach, rul_critical, anomaly_detected
+  type       String
   message    String
   value      Float?
   threshold  Float?
-  resolved   Boolean     @default(false)
+  resolved   Boolean    @default(false)
   resolvedAt DateTime?
   resolvedBy String?
-  createdAt  DateTime    @default(now())
+  createdAt  DateTime   @default(now())
 
   @@index([sensorId])
   @@index([resolved])
@@ -269,22 +258,20 @@ enum AlertLevel {
   CRITICAL
 }
 
-// ─── Compliance & Audit ────────────────────────────────────────────────────
-
 model AuditLog {
-  id          String   @id @default(cuid())
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id])
-  orgId       String?
-  org         Org?     @relation(fields: [orgId], references: [id])
-  action      String   // user.login, sensor.read, api_key.create, data.export
-  resource    String?
-  resourceId  String?
-  ipAddress   String?
-  userAgent   String?
-  outcome     String   @default("success") // success | failure | blocked
-  metadata    Json     @default("{}")
-  timestamp   DateTime @default(now())
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  orgId      String?
+  org        Org?     @relation(fields: [orgId], references: [id])
+  action     String
+  resource   String?
+  resourceId String?
+  ipAddress  String?
+  userAgent  String?
+  outcome    String   @default("success")
+  metadata   Json     @default("{}")
+  timestamp  DateTime @default(now())
 
   @@index([userId])
   @@index([orgId])
@@ -292,31 +279,15 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-model ComplianceDoc {
-  id        String   @id @default(cuid())
-  orgId     String
-  org       Org      @relation(fields: [orgId], references: [id])
-  type      String   // gdpr_consent, ccpa_opt_out, data_processing_agreement
-  version   String
-  signedAt  DateTime
-  signedBy  String
-  content   String   @db.Text
-  hash      String   // SHA-256 of content for tamper detection
-
-  createdAt DateTime @default(now())
-
-  @@map("compliance_docs")
-}
-
 model DataRetentionPolicy {
-  id              String   @id @default(cuid())
-  dataType        String   @unique // sensor_readings, predictions, audit_logs
-  retentionDays   Int
+  id               String    @id @default(cuid())
+  dataType         String    @unique
+  retentionDays    Int
   archiveAfterDays Int?
   deleteAfterDays  Int?
   lastRunAt        DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@map("data_retention_policies")
 }
