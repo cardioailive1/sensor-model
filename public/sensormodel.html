@@ -387,6 +387,37 @@ Node: ns=2;s=predictions/alert_level
     <span class="hdr-stat">Update: <span id="hdrHz">10 Hz</span></span>
     <span class="hdr-stat">Sensors: <span id="hdrSensors">0 active</span></span>
     <button class="connect-btn" onclick="document.getElementById('connectModal').classList.add('open')">API Connect</button>
+    <div style="position:relative;margin-left:8px;">
+      <button id="sm-account-btn" onclick="event.stopPropagation();var m=document.getElementById('sm-account-menu');m.style.display=m.style.display==='block'?'none':'block'"
+        style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 12px;cursor:pointer;color:#fff;font-size:13px;">
+        <span id="sm-avatar" style="width:26px;height:26px;border-radius:50%;background:rgba(0,194,224,0.25);display:inline-flex;align-items:center;justify-content:center;color:#00c2e0;font-weight:700;font-size:12px;">U</span>
+        <span id="sm-display-name" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Account</span>
+        <span style="color:#6b7280;font-size:10px;">▾</span>
+      </button>
+      <div id="sm-account-menu" style="display:none;position:absolute;top:42px;right:0;width:260px;background:#0d1f3c;border:1px solid rgba(255,255,255,0.12);border-radius:10px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.5);overflow:hidden;">
+        <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div id="sm-menu-name" style="color:#fff;font-weight:600;font-size:14px;margin-bottom:2px;">—</div>
+          <div id="sm-menu-email" style="color:#6b7280;font-size:12px;">—</div>
+          <span id="sm-menu-role" style="display:inline-block;margin-top:6px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(0,194,224,0.15);color:#00c2e0;">—</span>
+        </div>
+        <div style="padding:6px;">
+          <a id="sm-admin-link" href="/admin/users" style="display:none;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#fff;text-decoration:none;font-size:13px;transition:background 0.15s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
+            <span>👥</span> Manage Users &amp; Approvals
+          </a>
+          <button onclick="document.getElementById('sm-pw-modal').style.display='flex';document.getElementById('sm-account-menu').style.display='none'"
+            style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#fff;background:transparent;border:none;cursor:pointer;font-size:13px;text-align:left;"
+            onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
+            <span>🔑</span> Password Reset
+          </button>
+          <button onclick="smLogout()"
+            style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#ef4444;background:transparent;border:none;cursor:pointer;font-size:13px;text-align:left;"
+            onmouseover="this.style.background='rgba(239,68,68,0.08)'" onmouseout="this.style.background='transparent'">
+            <span>🚪</span> Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -2122,110 +2153,48 @@ renderPMAlerts();
   }
 })();
 </script>
-
-<div id="sm-account-menu" style="display:none;position:fixed;top:56px;right:16px;width:280px;background:#0d1f3c;border:1px solid rgba(255,255,255,0.12);border-radius:12px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.4);overflow:hidden;">
-  <div id="sm-account-header" style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);">
-    <div id="sm-account-name" style="color:#fff;font-weight:600;font-size:14px;margin-bottom:2px;">—</div>
-    <div id="sm-account-email" style="color:#6b7280;font-size:12px;">—</div>
-    <div id="sm-account-role" style="display:inline-block;margin-top:6px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(0,194,224,0.15);color:#00c2e0;">—</div>
-  </div>
-  <div style="padding:8px;">
-    <a href="/admin/users" id="sm-admin-link" style="display:none;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#fff;text-decoration:none;font-size:13px;transition:background 0.2s;"
-      onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
-      <span style="font-size:16px;">👥</span> Manage Users
-    </a>
-    <button onclick="document.getElementById('sm-password-modal').style.display='flex'"
-      style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#fff;background:transparent;border:none;cursor:pointer;font-size:13px;text-align:left;transition:background 0.2s;"
-      onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
-      <span style="font-size:16px;">🔑</span> Reset Password
-    </button>
-    <button onclick="smLogout()"
-      style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#ef4444;background:transparent;border:none;cursor:pointer;font-size:13px;text-align:left;transition:background 0.2s;"
-      onmouseover="this.style.background='rgba(239,68,68,0.08)'" onmouseout="this.style.background='transparent'">
-      <span style="font-size:16px;">🚪</span> Sign Out
-    </button>
-  </div>
-</div>
-
-<!-- Password Reset Modal -->
-<div id="sm-password-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999999;align-items:center;justify-content:center;">
-  <div style="background:#0d1f3c;border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:32px;width:100%;max-width:420px;margin:16px;">
-    <h3 style="color:#fff;font-size:18px;margin:0 0 8px;">Reset Password</h3>
-    <p style="color:#9ca3af;font-size:13px;margin:0 0 20px;line-height:1.6;">
-      SensorModel uses OAuth sign-in (Google, GitHub, or Microsoft). To reset your password, use your identity provider's password reset flow.
-    </p>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <a href="https://myaccount.google.com/security" target="_blank"
-        style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;text-decoration:none;font-size:13px;">
-        <span>🔵</span> Reset Google Password
-      </a>
-      <a href="https://github.com/settings/security" target="_blank"
-        style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;text-decoration:none;font-size:13px;">
-        <span>⚫</span> Reset GitHub Password
-      </a>
-      <a href="https://account.microsoft.com/security" target="_blank"
-        style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;text-decoration:none;font-size:13px;">
-        <span>🔷</span> Reset Microsoft Password
-      </a>
-    </div>
-    <button onclick="document.getElementById('sm-password-modal').style.display='none'"
-      style="margin-top:20px;width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#9ca3af;cursor:pointer;font-size:13px;">
-      Close
-    </button>
-  </div>
 </div>
 
 <script>
-// Account menu logic
-function smInitAccountMenu() {
+// ── Account Menu ──────────────────────────────────────────
+function smInitAccount() {
   if (!window.SM_USER) return;
-
-  const u = window.SM_USER;
-  document.getElementById('sm-account-name').textContent  = u.name  || 'User';
-  document.getElementById('sm-account-email').textContent = u.email || '';
-  document.getElementById('sm-account-role').textContent  = u.role  || 'ENGINEER';
-
+  var u = window.SM_USER;
+  var initial = (u.name || 'U')[0].toUpperCase();
+  var el = document.getElementById('sm-avatar');
+  if (el) el.textContent = initial;
+  var dn = document.getElementById('sm-display-name');
+  if (dn) dn.textContent = u.name || u.email || 'Account';
+  var mn = document.getElementById('sm-menu-name');
+  if (mn) mn.textContent = u.name || '—';
+  var me = document.getElementById('sm-menu-email');
+  if (me) me.textContent = u.email || '—';
+  var mr = document.getElementById('sm-menu-role');
+  if (mr) mr.textContent = u.role || 'ENGINEER';
+  // Show admin link for SUPER_ADMIN and ADMIN
   if (u.role === 'SUPER_ADMIN' || u.role === 'ADMIN') {
-    document.getElementById('sm-admin-link').style.display = 'flex';
+    var al = document.getElementById('sm-admin-link');
+    if (al) al.style.display = 'flex';
   }
-
-  // Find the header and inject account button
-  const header = document.querySelector('header') || document.querySelector('.header') || document.querySelector('[class*="header"]');
-  if (header) {
-    const btn = document.createElement('button');
-    btn.id = 'sm-account-btn';
-    btn.innerHTML = '<span style="width:28px;height:28px;border-radius:50%;background:rgba(0,194,224,0.2);display:inline-flex;align-items:center;justify-content:center;color:#00c2e0;font-weight:700;font-size:13px;">' +
-      (u.name ? u.name[0].toUpperCase() : 'U') + '</span>' +
-      '<span style="margin-left:6px;font-size:13px;color:#fff;">' + (u.name || 'Account') + '</span>' +
-      '<span style="margin-left:6px;color:#6b7280;font-size:12px;">▾</span>';
-    btn.style.cssText = 'position:fixed;top:12px;right:16px;display:flex;align-items:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:5px 10px;cursor:pointer;z-index:99998;';
-    btn.onclick = function(e) {
-      e.stopPropagation();
-      const menu = document.getElementById('sm-account-menu');
-      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-    };
-    document.body.appendChild(btn);
-  }
-
-  // Close menu on outside click
-  document.addEventListener('click', function() {
-    document.getElementById('sm-account-menu').style.display = 'none';
-  });
-  document.getElementById('sm-account-menu').addEventListener('click', function(e) { e.stopPropagation(); });
 }
 
-async function smLogout() {
-  try {
-    await fetch('/api/auth/signout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
-  } catch(e) {}
-  window.location.href = '/auth/signin';
+function smLogout() {
+  fetch('/api/auth/signout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' })
+    .catch(function(){})
+    .finally(function(){ window.location.href = '/auth/signin'; });
 }
 
-// Remove old admin button if present (now in menu)
-document.addEventListener('DOMContentLoaded', function() {
-  smInitAccountMenu();
+// Close menu on outside click
+document.addEventListener('click', function() {
+  var m = document.getElementById('sm-account-menu');
+  if (m) m.style.display = 'none';
 });
-if (document.readyState !== 'loading') smInitAccountMenu();
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', smInitAccount);
+} else {
+  smInitAccount();
+}
 </script>
 </body>
 </html>
